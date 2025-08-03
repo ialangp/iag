@@ -34,7 +34,6 @@
     .inventory-item img {
       width: 60px;
       height: 60px;
-      border: 2px solid #ccc;
       border-radius: 8px;
     }
 
@@ -101,22 +100,21 @@
 </head>
 <body>
   <h2>Minijuego Drag & Drop</h2>
-  <h3>Coalición Va x la CDMX</h3>	
-  <p>Arrastra las frutas al tablero (máx: PAN 6, PRI 6, PRD 4).</p>
+  <p>Arrastra los logos al tablero (máx: PAN 6, PRI 6, PRD 4). Puedes moverlos entre celdas.</p>
 
   <div class="container">
     <div class="inventory">
-      <div class="inventory-item" draggable="true" data-type="apple">
-        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PAN.png" alt="Apple">
-        <span>PAN x <span class="count" id="count-apple">6</span></span>
+      <div class="inventory-item" draggable="true" data-type="pan">
+        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PAN.png" alt="PAN">
+        <span>PAN x <span class="count" id="count-pan">6</span></span>
       </div>
-      <div class="inventory-item" draggable="true" data-type="banana">
-        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRI_logo_Mexico.svg" alt="Banana">
-        <span>PRI x <span class="count" id="count-banana">6</span></span>
+      <div class="inventory-item" draggable="true" data-type="pri">
+        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRI_logo_Mexico.svg" alt="PRI">
+        <span>PRI x <span class="count" id="count-pri">6</span></span>
       </div>
-      <div class="inventory-item" draggable="true" data-type="grape">
-        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRD.png" alt="Grape">
-        <span>PRD x <span class="count" id="count-grape">4</span></span>
+      <div class="inventory-item" draggable="true" data-type="prd">
+        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRD.png" alt="PRD">
+        <span>PRD x <span class="count" id="count-prd">4</span></span>
       </div>
 
       <div class="controls">
@@ -142,15 +140,15 @@
 
   <script>
     const maxCounts = {
-      apple: 6,
-      banana: 6,
-      grape: 4
+      pan: 6,
+      pri: 6,
+      prd: 4
     };
 
     let usedCounts = {
-      apple: 0,
-      banana: 0,
-      grape: 0
+      pan: 0,
+      pri: 0,
+      prd: 0
     };
 
     const inventoryItems = document.querySelectorAll(".inventory-item");
@@ -200,19 +198,19 @@
           usedCounts[type]++;
           updateCountDisplay(type);
         } else {
-          alert("Ya usaste todos los de tipo: " + type);
+          alert("Ya usaste todos los de tipo: " + type.toUpperCase());
         }
       });
     });
 
     function getImageSrc(type) {
       switch (type) {
-        case "apple":
-          return "https://cdn-icons-png.flaticon.com/512/590/590685.png";
-        case "banana":
-          return "https://cdn-icons-png.flaticon.com/512/590/590684.png";
-        case "grape":
-          return "https://cdn-icons-png.flaticon.com/512/590/590682.png";
+        case "pan":
+          return "https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PAN.png";
+        case "pri":
+          return "https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRI_logo_Mexico.svg";
+        case "prd":
+          return "https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRD.png";
         default:
           return "";
       }
@@ -228,16 +226,15 @@
       });
 
       usedCounts = {
-        apple: 0,
-        banana: 0,
-        grape: 0
+        pan: 0,
+        pri: 0,
+        prd: 0
       };
 
-      updateCountDisplay("apple");
-      updateCountDisplay("banana");
-      updateCountDisplay("grape");
+      updateCountDisplay("pan");
+      updateCountDisplay("pri");
+      updateCountDisplay("prd");
     }
   </script>
 </body>
 </html>
-
