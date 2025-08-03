@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Minijuego Drag & Drop</title>
+  <title>Minijuego táctil</title>
   <style>
     body {
       font-family: sans-serif;
@@ -27,8 +27,16 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      cursor: grab;
+      cursor: pointer;
       user-select: none;
+      padding: 4px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+    }
+
+    .inventory-item.selected {
+      border-color: #007bff;
+      background: #eef6ff;
     }
 
     .inventory-item img {
@@ -60,6 +68,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
 
     .cell img {
@@ -99,20 +108,20 @@
   </style>
 </head>
 <body>
-  <h2>Minijuego Drag & Drop</h2>
-  <p>Arrastra los logos al tablero (máx: PAN 6, PRI 6, PRD 4). Puedes moverlos entre celdas.</p>
+  <h2>Minijuego táctil</h2>
+  <p>Toca un logo para seleccionarlo, luego toca una casilla para colocarlo. Máx: PAN 6, PRI 6, PRD 4</p>
 
   <div class="container">
     <div class="inventory">
-      <div class="inventory-item" draggable="true" data-type="pan">
+      <div class="inventory-item" data-type="pan">
         <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PAN.png" alt="PAN">
         <span>PAN x <span class="count" id="count-pan">6</span></span>
       </div>
-      <div class="inventory-item" draggable="true" data-type="pri">
+      <div class="inventory-item" data-type="pri">
         <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRI_logo.png.png" alt="PRI">
         <span>PRI x <span class="count" id="count-pri">6</span></span>
       </div>
-      <div class="inventory-item" draggable="true" data-type="prd">
+      <div class="inventory-item" data-type="prd">
         <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRD.png" alt="PRD">
         <span>PRD x <span class="count" id="count-prd">4</span></span>
       </div>
@@ -123,7 +132,6 @@
     </div>
 
     <div class="board" id="board">
-      <!-- Espacios con etiquetas -->
       <script>
         const labels = ["PERRO", "GATO", "MONO", "ARAÑA", "SERPIENTE", "OSO", "COCODRILO", "LEÓN", "TIGRE", "TIBURÓN", "CONEJO", "CABALLO", "DRAGÓN", "RATA", "GALLO", "ZEBRA"];
         for (let i = 0; i < 16; i++) {
@@ -139,66 +147,49 @@
   </div>
 
   <script>
-    const maxCounts = {
-      pan: 6,
-      pri: 6,
-      prd: 4
-    };
-
-    let usedCounts = {
-      pan: 0,
-      pri: 0,
-      prd: 0
-    };
+    const maxCounts = { pan: 6, pri: 6, prd: 4 };
+    let usedCounts = { pan: 0, pri: 0, prd: 0 };
+    let selectedType = null;
 
     const inventoryItems = document.querySelectorAll(".inventory-item");
-    const board = document.getElementById("board");
-
-    let draggedType = null;
+    const boardCells = document.querySelectorAll(".cell");
 
     inventoryItems.forEach(item => {
-      item.addEventListener("dragstart", (e) => {
-        draggedType = item.getAttribute("data-type");
-        e.dataTransfer.setData("text/plain", draggedType);
+      item.addEventListener("click", () => {
+        if (item.classList.contains("selected")) {
+          item.classList.remove("selected");
+          selectedType = null;
+        } else {
+          inventoryItems.forEach(i => i.classList.remove("selected"));
+          item.classList.add("selected");
+          selectedType = item.getAttribute("data-type");
+        }
       });
     });
 
-    board.querySelectorAll(".cell").forEach(cell => {
-      cell.addEventListener("dragover", (e) => {
-        e.preventDefault();
-      });
-
-      cell.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const type = e.dataTransfer.getData("text/plain");
-
+    boardCells.forEach(cell => {
+      cell.addEventListener("click", () => {
         const currentImg = cell.querySelector("img");
+
         if (currentImg) {
           const prevType = currentImg.getAttribute("data-type");
           usedCounts[prevType]--;
           updateCountDisplay(prevType);
           cell.innerHTML = "";
+          return;
         }
 
-        if (usedCounts[type] < maxCounts[type]) {
+        if (!selectedType) return;
+
+        if (usedCounts[selectedType] < maxCounts[selectedType]) {
           const img = document.createElement("img");
-          img.src = getImageSrc(type);
-          img.setAttribute("data-type", type);
-          img.setAttribute("draggable", "true");
-
-          img.addEventListener("dragstart", (ev) => {
-            draggedType = img.getAttribute("data-type");
-            ev.dataTransfer.setData("text/plain", draggedType);
-            img.parentElement.innerHTML = ""; // remove on move
-            usedCounts[draggedType]--;
-            updateCountDisplay(draggedType);
-          });
-
+          img.src = getImageSrc(selectedType);
+          img.setAttribute("data-type", selectedType);
           cell.appendChild(img);
-          usedCounts[type]++;
-          updateCountDisplay(type);
+          usedCounts[selectedType]++;
+          updateCountDisplay(selectedType);
         } else {
-          alert("Ya usaste todos los de tipo: " + type.toUpperCase());
+          alert("Ya usaste todos los de tipo: " + selectedType.toUpperCase());
         }
       });
     });
@@ -221,20 +212,15 @@
     }
 
     function reiniciarJuego() {
-      board.querySelectorAll(".cell").forEach(cell => {
-        cell.innerHTML = "";
-      });
-
-      usedCounts = {
-        pan: 0,
-        pri: 0,
-        prd: 0
-      };
-
+      boardCells.forEach(cell => cell.innerHTML = "");
+      usedCounts = { pan: 0, pri: 0, prd: 0 };
       updateCountDisplay("pan");
       updateCountDisplay("pri");
       updateCountDisplay("prd");
+      selectedType = null;
+      inventoryItems.forEach(i => i.classList.remove("selected"));
     }
   </script>
 </body>
 </html>
+
