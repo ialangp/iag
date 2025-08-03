@@ -131,22 +131,31 @@
       </div>
     </div>
 
-    <div class="board" id="board">
-      <script>
-        const labels = ["ALVARO OBREGÓN", "AZCAPOTZALCO", "BENITO JUAREZ", "COYOACAN", "CUAJIMALPA", "CUAUHTEMOC", "GAM", "IZTACALCO", "IZTAPALAPA", "LA MAGDALENA CONTRERAS", "MIGUEL HIDALGO", "MILPA ALTA", "TLAHUAC", "TLALPAN", "VENUSTIANO CARRANZA", "XOCHIMILCO"];
-        for (let i = 0; i < 16; i++) {
-          document.write(`
-            <div class="cell-wrapper">
-              <div class="cell" data-slot></div>
-              <div class="cell-label">${labels[i]}</div>
-            </div>
-          `);
-        }
-      </script>
-    </div>
+    <div class="board" id="board"></div>
   </div>
 
   <script>
+    const labels = ["ALVARO OBREGÓN", "AZCAPOTZALCO", "BENITO JUAREZ", "COYOACAN", "CUAJIMALPA", "CUAUHTEMOC", "GAM", "IZTACALCO", "IZTAPALAPA", "LA MAGDALENA CONTRERAS", "MIGUEL HIDALGO", "MILPA ALTA", "TLAHUAC", "TLALPAN", "VENUSTIANO CARRANZA", "XOCHIMILCO"];
+    const board = document.getElementById("board");
+
+    // Crear las 16 celdas dinámicamente
+    labels.forEach(label => {
+      const wrapper = document.createElement("div");
+      wrapper.classList.add("cell-wrapper");
+
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.setAttribute("data-slot", "");
+      wrapper.appendChild(cell);
+
+      const labelDiv = document.createElement("div");
+      labelDiv.classList.add("cell-label");
+      labelDiv.textContent = label;
+      wrapper.appendChild(labelDiv);
+
+      board.appendChild(wrapper);
+    });
+
     const maxCounts = { pan: 6, pri: 6, prd: 4 };
     let usedCounts = { pan: 0, pri: 0, prd: 0 };
     let selectedType = null;
@@ -167,7 +176,8 @@
       });
     });
 
-    boardCells.forEach(cell => {
+    // Actualizamos después de crear las celdas
+    document.querySelectorAll(".cell").forEach(cell => {
       cell.addEventListener("click", () => {
         const currentImg = cell.querySelector("img");
 
@@ -212,7 +222,9 @@
     }
 
     function reiniciarJuego() {
-      boardCells.forEach(cell => cell.innerHTML = "");
+      document.querySelectorAll(".cell").forEach(cell => {
+        cell.innerHTML = "";
+      });
       usedCounts = { pan: 0, pri: 0, prd: 0 };
       updateCountDisplay("pan");
       updateCountDisplay("pri");
