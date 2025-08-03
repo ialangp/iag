@@ -1,13 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Minijuego táctil</title>
+  <meta charset="UTF-8" />
+  <title>Minijuego iAG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: sans-serif;
       background: #f7f7f7;
+      position: relative;
       padding: 20px;
+      margin: 0;
+    }
+
+    /* Fondo tenue */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/iAG.png') no-repeat center center;
+      background-size: 300px 300px;
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-wrapper {
+      max-width: 70%;
+      margin: 0 auto;
+    }
+
+    h2, p {
+      text-align: center;
     }
 
     .container {
@@ -15,6 +44,7 @@
       gap: 40px;
       flex-wrap: wrap;
       align-items: flex-start;
+      justify-content: center;
     }
 
     .inventory {
@@ -32,6 +62,7 @@
       padding: 4px;
       border: 2px solid transparent;
       border-radius: 8px;
+      background: #fff;
     }
 
     .inventory-item.selected {
@@ -105,40 +136,70 @@
     button:hover {
       background-color: #45a049;
     }
+
+    /* 📱 Estilos para móviles */
+    @media (max-width: 768px) {
+      .game-wrapper {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .board {
+        grid-template-columns: repeat(2, 100px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .board {
+        grid-template-columns: repeat(1, 100px);
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>Minijuego táctil</h2>
-  <p>Toca un logo para seleccionarlo, luego toca una casilla para colocarlo. Máx: PAN 6, PRI 6, PRD 4</p>
+  <div class="game-wrapper">
+    <h2>Minijuego crea tu Coalición</h2>
+    <h3> <center>Nivel: Taboada</center> </h3>
+    <p>Toca un logo para seleccionarlo, luego toca una casilla para colocarlo. Máx: PAN 6, PRI 6, PRD 4</p>
 
-  <div class="container">
-    <div class="inventory">
-      <div class="inventory-item" data-type="pan">
-        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PAN.png" alt="PAN">
-        <span>PAN x <span class="count" id="count-pan">6</span></span>
-      </div>
-      <div class="inventory-item" data-type="pri">
-        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRI_logo.png.png" alt="PRI">
-        <span>PRI x <span class="count" id="count-pri">6</span></span>
-      </div>
-      <div class="inventory-item" data-type="prd">
-        <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRD.png" alt="PRD">
-        <span>PRD x <span class="count" id="count-prd">4</span></span>
+    <div class="container">
+      <div class="inventory">
+        <div class="inventory-item" data-type="pan">
+          <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PAN.png" alt="PAN" />
+          <span>PAN x <span class="count" id="count-pan">6</span></span>
+        </div>
+        <div class="inventory-item" data-type="pri">
+          <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRI_logo.png.png" alt="PRI" />
+          <span>PRI x <span class="count" id="count-pri">6</span></span>
+        </div>
+        <div class="inventory-item" data-type="prd">
+          <img src="https://movimientociudadanocdmx.org/wp-content/uploads/2025/08/PRD.png" alt="PRD" />
+          <span>PRD x <span class="count" id="count-prd">4</span></span>
+        </div>
+
+        <div class="controls">
+          <button onclick="reiniciarJuego()">🔁 REINICIAR</button>
+        </div>
       </div>
 
-      <div class="controls">
-        <button onclick="reiniciarJuego()">🔁 REINICIAR</button>
-      </div>
+      <div class="board" id="board"></div>
     </div>
-
-    <div class="board" id="board"></div>
   </div>
 
   <script>
-    const labels = ["ALVARO OBREGÓN", "AZCAPOTZALCO", "BENITO JUAREZ", "COYOACAN", "CUAJIMALPA", "CUAUHTEMOC", "GAM", "IZTACALCO", "IZTAPALAPA", "LA MAGDALENA CONTRERAS", "MIGUEL HIDALGO", "MILPA ALTA", "TLAHUAC", "TLALPAN", "VENUSTIANO CARRANZA", "XOCHIMILCO"];
+    const labels = [
+      "ALVARO OBREGÓN", "AZCAPOTZALCO", "BENITO JUAREZ", "COYOACAN",
+      "CUAJIMALPA", "CUAUHTEMOC", "GAM", "IZTACALCO",
+      "IZTAPALAPA", "LA MAGDALENA CONTRERAS", "MIGUEL HIDALGO", "MILPA ALTA",
+      "TLAHUAC", "TLALPAN", "VENUSTIANO CARRANZA", "XOCHIMILCO"
+    ];
     const board = document.getElementById("board");
 
-    // Crear las 16 celdas dinámicamente
     labels.forEach(label => {
       const wrapper = document.createElement("div");
       wrapper.classList.add("cell-wrapper");
@@ -161,7 +222,6 @@
     let selectedType = null;
 
     const inventoryItems = document.querySelectorAll(".inventory-item");
-    const boardCells = document.querySelectorAll(".cell");
 
     inventoryItems.forEach(item => {
       item.addEventListener("click", () => {
@@ -172,34 +232,6 @@
           inventoryItems.forEach(i => i.classList.remove("selected"));
           item.classList.add("selected");
           selectedType = item.getAttribute("data-type");
-        }
-      });
-    });
-
-    // Actualizamos después de crear las celdas
-    document.querySelectorAll(".cell").forEach(cell => {
-      cell.addEventListener("click", () => {
-        const currentImg = cell.querySelector("img");
-
-        if (currentImg) {
-          const prevType = currentImg.getAttribute("data-type");
-          usedCounts[prevType]--;
-          updateCountDisplay(prevType);
-          cell.innerHTML = "";
-          return;
-        }
-
-        if (!selectedType) return;
-
-        if (usedCounts[selectedType] < maxCounts[selectedType]) {
-          const img = document.createElement("img");
-          img.src = getImageSrc(selectedType);
-          img.setAttribute("data-type", selectedType);
-          cell.appendChild(img);
-          usedCounts[selectedType]++;
-          updateCountDisplay(selectedType);
-        } else {
-          alert("Ya usaste todos los de tipo: " + selectedType.toUpperCase());
         }
       });
     });
@@ -232,6 +264,35 @@
       selectedType = null;
       inventoryItems.forEach(i => i.classList.remove("selected"));
     }
+
+    const boardCells = document.querySelectorAll(".cell");
+
+    boardCells.forEach(cell => {
+      cell.addEventListener("click", () => {
+        const currentImg = cell.querySelector("img");
+
+        if (currentImg) {
+          const prevType = currentImg.getAttribute("data-type");
+          usedCounts[prevType]--;
+          updateCountDisplay(prevType);
+          cell.innerHTML = "";
+          return;
+        }
+
+        if (!selectedType) return;
+
+        if (usedCounts[selectedType] < maxCounts[selectedType]) {
+          const img = document.createElement("img");
+          img.src = getImageSrc(selectedType);
+          img.setAttribute("data-type", selectedType);
+          cell.appendChild(img);
+          usedCounts[selectedType]++;
+          updateCountDisplay(selectedType);
+        } else {
+          alert("Agotaste todas las postulaciones del " + selectedType.toUpperCase());
+        }
+      });
+    });
   </script>
 </body>
 </html>
