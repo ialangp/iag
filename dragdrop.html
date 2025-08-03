@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Minijuego Drag & Drop</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .inventory {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .inventory-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .inventory-item img {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-template-rows: repeat(4, auto);
+      gap: 10px;
+    }
+
+    .cell-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cell {
+      width: 80px;
+      height: 80px;
+      background: #fff;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cell img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+    }
+
+    .cell-label {
+      font-size: 14px;
+      text-align: center;
+      color: #444;
+    }
+
+    .count {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h2>Minijuego Drag & Drop</h2>
+  <p>Arrastra las frutas al tablero (máx: 🍎 6, 🍌 6, 🍇 4). Puedes moverlas entre celdas.</p>
+
+  <div class="container">
+    <div class="inventory">
+      <div class="inventory-item" draggable="true" data-type="apple">
+        <img src="https://cdn-icons-png.flaticon.com/512/590/590685.png" alt="Apple">
+        <span>🍎 x <span class="count" id="count-apple">6</span></span>
+      </div>
+      <div class="inventory-item" draggable="true" data-type="banana">
+        <img src="https://cdn-icons-png.flaticon.com/512/590/590684.png" alt="Banana">
+        <span>🍌 x <span class="count" id="count-banana">6</span></span>
+      </div>
+      <div class="inventory-item" draggable="true" data-type="grape">
+        <img src="https://cdn-icons-png.flaticon.com/512/590/590682.png" alt="Grape">
+        <span>🍇 x <span class="count" id="count-grape">4</span></span>
+      </div>
+
+      <div class="controls">
+        <button onclick="reiniciarJuego()">🔁 REINICIAR</button>
+      </div>
+    </div>
+
+    <div class="board" id="board">
+      <!-- Espacios con etiquetas -->
+      <script>
+        const labels = ["PERRO", "GATO", "MONO", "ARAÑA", "SERPIENTE", "OSO", "COCODRILO", "LEÓN", "TIGRE", "TIBURÓN", "CONEJO", "CABALLO", "DRAGÓN", "RATA", "GALLO", "ZEBRA"];
+        for (let i = 0; i < 16; i++) {
+          document.write(`
+            <div class="cell-wrapper">
+              <div class="cell" data-slot></div>
+              <div class="cell-label">${labels[i]}</div>
+            </div>
+          `);
+        }
+      </script>
+    </div>
+  </div>
+
+  <script>
+    const maxCounts = {
+      apple: 6,
+      banana: 6,
+      grape: 4
+    };
+
+    let usedCounts = {
+      apple: 0,
+      banana: 0,
+      grape: 0
+    };
+
+    const inventoryItems = document.querySelectorAll(".inventory-item");
+    const board = document.getElementById("board");
+
+    let draggedType = null;
+
+    inventoryItems.forEach(item => {
+      item.addEventListener("dragstart", (e) => {
+        draggedType = item.getAttribute("data-type");
+        e.dataTransfer.setData("text/plain", draggedType);
+      });
+    });
+
+    board.querySelectorAll(".cell").forEach(cell => {
+      cell.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+
+      cell.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const type = e.dataTransfer.getData("text/plain");
+
+        const currentImg = cell.querySelector("img");
+        if (currentImg) {
+          const prevType = currentImg.getAttribute("data-type");
+          usedCounts[prevType]--;
+          updateCountDisplay(prevType);
+          cell.innerHTML = "";
+        }
+
+        if (usedCounts[type] < maxCounts[type]) {
+          const img = document.createElement("img");
+          img.src = getImageSrc(type);
+          img.setAttribute("data-type", type);
+          img.setAttribute("draggable", "true");
+
+          img.addEventListener("dragstart", (ev) => {
+            draggedType = img.getAttribute("data-type");
+            ev.dataTransfer.setData("text/plain", draggedType);
+            img.parentElement.innerHTML = ""; // remove on move
+            usedCounts[draggedType]--;
+            updateCountDisplay(draggedType);
+          });
+
+          cell.appendChild(img);
+          usedCounts[type]++;
+          updateCountDisplay(type);
+        } else {
+          alert("Ya usaste todos los de tipo: " + type);
+        }
+      });
+    });
+
+    function getImageSrc(type) {
+      switch (type) {
+        case "apple":
+          return "https://cdn-icons-png.flaticon.com/512/590/590685.png";
+        case "banana":
+          return "https://cdn-icons-png.flaticon.com/512/590/590684.png";
+        case "grape":
+          return "https://cdn-icons-png.flaticon.com/512/590/590682.png";
+        default:
+          return "";
+      }
+    }
+
+    function updateCountDisplay(type) {
+      document.getElementById("count-" + type).textContent = maxCounts[type] - usedCounts[type];
+    }
+
+    function reiniciarJuego() {
+      board.querySelectorAll(".cell").forEach(cell => {
+        cell.innerHTML = "";
+      });
+
+      usedCounts = {
+        apple: 0,
+        banana: 0,
+        grape: 0
+      };
+
+      updateCountDisplay("apple");
+      updateCountDisplay("banana");
+      updateCountDisplay("grape");
+    }
+  </script>
+</body>
+</html>
+
