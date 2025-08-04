@@ -9,11 +9,10 @@
       font-family: sans-serif;
       background: #f7f7f7;
       position: relative;
-      padding: 20px;
+      padding: 10px 20px 20px 20px;
       margin: 0;
     }
 
-    /* Fondo tenue */
     body::before {
       content: "";
       position: fixed;
@@ -31,7 +30,7 @@
     }
 
     .game-wrapper {
-      max-width: 70%;
+      max-width: 80%;
       margin: 0 auto;
     }
 
@@ -100,6 +99,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: box-shadow 0.3s ease;
     }
 
     .cell img {
@@ -121,6 +121,9 @@
 
     .controls {
       margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
 
     button {
@@ -131,13 +134,13 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
       background-color: #45a049;
     }
 
-    /* 📱 Estilos para móviles */
     @media (max-width: 768px) {
       .game-wrapper {
         max-width: 100%;
@@ -147,16 +150,51 @@
       .container {
         flex-direction: column;
         align-items: center;
+        gap: 20px;
       }
 
       .board {
-        grid-template-columns: repeat(2, 100px);
+        grid-template-columns: repeat(4, 80px);
+      }
+
+      .cell {
+        width: 70px;
+        height: 70px;
+      }
+
+      .cell img {
+        width: 50px;
+        height: 50px;
+      }
+
+      .inventory-item img {
+        width: 50px;
+        height: 50px;
+      }
+
+      .inventory-item {
+        gap: 8px;
       }
     }
 
     @media (max-width: 480px) {
       .board {
-        grid-template-columns: repeat(1, 100px);
+        grid-template-columns: repeat(3, 70px);
+      }
+
+      .cell {
+        width: 65px;
+        height: 65px;
+      }
+
+      .cell img {
+        width: 45px;
+        height: 45px;
+      }
+
+      .inventory-item img {
+        width: 45px;
+        height: 45px;
       }
     }
   </style>
@@ -164,7 +202,7 @@
 <body>
   <div class="game-wrapper">
     <h2>Minijuego crea tu Coalición</h2>
-    <h3> <center>Nivel: Taboada</center> </h3>
+    <h3 style="text-align: center;">Nivel: Taboada</h3>
     <p>Toca un logo para seleccionarlo, luego toca una casilla para colocarlo. Máx: PAN 6, PRI 6, PRD 4</p>
 
     <div class="container">
@@ -184,6 +222,7 @@
 
         <div class="controls">
           <button onclick="reiniciarJuego()">🔁 REINICIAR</button>
+          <button onclick="compararRespuestas()">✅ COMPARAR</button>
         </div>
       </div>
 
@@ -256,6 +295,7 @@
     function reiniciarJuego() {
       document.querySelectorAll(".cell").forEach(cell => {
         cell.innerHTML = "";
+        cell.style.boxShadow = ""; // Quitar colores de comparación al reiniciar
       });
       usedCounts = { pan: 0, pri: 0, prd: 0 };
       updateCountDisplay("pan");
@@ -276,6 +316,7 @@
           usedCounts[prevType]--;
           updateCountDisplay(prevType);
           cell.innerHTML = "";
+          cell.style.boxShadow = ""; // Quitar colores al cambiar
           return;
         }
 
@@ -293,6 +334,46 @@
         }
       });
     });
+
+    function compararRespuestas() {
+      const respuestas = {
+        "ALVARO OBREGÓN": "pan",
+        "AZCAPOTZALCO": "pri",
+        "BENITO JUAREZ": "pan",
+        "COYOACAN": "prd",
+        "CUAJIMALPA": "prd",
+        "CUAUHTEMOC": "pri",
+        "GAM": "prd",
+        "IZTACALCO": "pan",
+        "IZTAPALAPA": "prd",
+        "LA MAGDALENA CONTRERAS": "pri",
+        "MIGUEL HIDALGO": "pri",
+        "MILPA ALTA": "pan",
+        "TLAHUAC": "pri",
+        "TLALPAN": "pan",
+        "VENUSTIANO CARRANZA": "pan",
+        "XOCHIMILCO": "pri"
+      };
+
+      document.querySelectorAll('.cell-wrapper').forEach(wrapper => {
+        const cell = wrapper.querySelector('.cell');
+        const label = wrapper.querySelector('.cell-label').textContent;
+        const img = cell.querySelector('img');
+
+        cell.style.boxShadow = '';
+
+        if (img) {
+          const tipo = img.getAttribute('data-type');
+          if (tipo === respuestas[label]) {
+            cell.style.boxShadow = '0 0 0 4px rgba(0, 200, 0, 0.4)';
+          } else {
+            cell.style.boxShadow = '0 0 0 4px rgba(255, 0, 0, 0.4)';
+          }
+        } else {
+          cell.style.boxShadow = '0 0 0 4px rgba(255, 0, 0, 0.4)';
+        }
+      });
+    }
   </script>
 </body>
 </html>
